@@ -151,16 +151,7 @@ export const Desktop: React.FC<DesktopProps> = ({ isRevealed = true }) => {
       </div>
 
       {/* Exactly 5 Dock Slots */}
-      <div
-        style={{
-          opacity: isRevealed ? 1 : 0,
-          transform: isRevealed ? 'translateY(0)' : 'translateY(16px)',
-          transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
-          pointerEvents: isRevealed ? 'auto' : 'none',
-        }}
-      >
-        <Dock items={DOCK_ITEMS} onItemClick={handleDockItemClick} />
-      </div>
+      <Dock items={DOCK_ITEMS} onItemClick={handleDockItemClick} isRevealed={isRevealed} />
     </div>
   );
 };

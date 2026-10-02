@@ -1,4 +1,9 @@
 import React from 'react';
+import dockAbout from '../../assets/dock/dock_1.png';
+import dockGlobe from '../../assets/dock/dock_2.png';
+import dockCamera from '../../assets/dock/dock_3.png';
+import dockMegaphone from '../../assets/dock/dock_4.png';
+import dockMessages from '../../assets/dock/dock_5.png';
 
 interface IconGraphicsProps {
   id: string;
@@ -260,206 +265,188 @@ export const AppIconGraphics: React.FC<IconGraphicsProps> = ({ id, size = 76 }) 
       );
 
     // ----------------------------------------------------
-    // DOCK SLOT 1: About Me
+    // ----------------------------------------------------
+    // DOCK SLOT 1: About Me (Glossy 3D Profile/Person from reference)
     // ----------------------------------------------------
     case 'dock-about':
       return (
         <div
           style={{
-            width: size,
-            height: size,
-            borderRadius: squircleRadius,
-            background: 'linear-gradient(180deg, #c084fc 0%, #7c3aed 100%)',
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${Math.round(size * 0.27)}px`,
+            border: '1px solid rgba(230, 230, 235, 0.6)',
+            boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.16)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(124, 58, 237, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            position: 'relative',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div
+          <img
+            src={dockAbout}
+            alt="About Me"
+            width={size}
+            height={size}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%)',
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              objectFit: 'cover',
             }}
+            draggable={false}
           />
-          <svg width={size * 0.56} height={size * 0.56} viewBox="0 0 24 24" fill="#ffffff">
-            <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
-          </svg>
         </div>
       );
 
     // ----------------------------------------------------
-    // DOCK SLOT 2: RESERVED / UNSPECIFIED
+    // DOCK SLOT 2: RESERVED / UNSPECIFIED (Glossy 3D Globe from reference)
     // ----------------------------------------------------
     case 'dock-reserved-2':
       return (
         <div
           style={{
-            width: size,
-            height: size,
-            borderRadius: squircleRadius,
-            background: 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)',
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${Math.round(size * 0.27)}px`,
+            border: '1px solid rgba(230, 230, 235, 0.6)',
+            boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.16)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(2, 132, 199, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            position: 'relative',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div
+          <img
+            src={dockGlobe}
+            alt="Globe"
+            width={size}
+            height={size}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%)',
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              objectFit: 'cover',
             }}
+            draggable={false}
           />
-          {/* Wireframe globe matching reference slot 2 */}
-          <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
         </div>
       );
 
     // ----------------------------------------------------
-    // DOCK SLOT 3: Gallery
+    // DOCK SLOT 3: Gallery (Glossy 3D Camera from reference)
     // ----------------------------------------------------
     case 'dock-gallery':
       return (
         <div
           style={{
-            width: size,
-            height: size,
-            borderRadius: squircleRadius,
-            background: 'linear-gradient(180deg, #64748b 0%, #334155 100%)',
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${Math.round(size * 0.27)}px`,
+            border: '1px solid rgba(230, 230, 235, 0.6)',
+            boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.16)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35)',
-            border: '1px solid rgba(255, 255, 255, 0.25)',
-            position: 'relative',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div
+          <img
+            src={dockCamera}
+            alt="Gallery"
+            width={size}
+            height={size}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 100%)',
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              objectFit: 'cover',
             }}
+            draggable={false}
           />
-          {/* Camera lens matching reference slot 3 */}
-          <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 24 24" fill="none">
-            <path
-              d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z"
-              stroke="#ffffff"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="rgba(255, 255, 255, 0.15)"
-            />
-            <circle cx="12" cy="13" r="4" stroke="#ffffff" strokeWidth="2" fill="#38bdf8" />
-          </svg>
         </div>
       );
 
     // ----------------------------------------------------
-    // DOCK SLOT 4: RESERVED / UNSPECIFIED
+    // DOCK SLOT 4: RESERVED / UNSPECIFIED (Glossy 3D Megaphone from reference)
     // ----------------------------------------------------
     case 'dock-reserved-4':
       return (
         <div
           style={{
-            width: size,
-            height: size,
-            borderRadius: squircleRadius,
-            background: 'linear-gradient(180deg, #f87171 0%, #dc2626 100%)',
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${Math.round(size * 0.27)}px`,
+            border: '1px solid rgba(230, 230, 235, 0.6)',
+            boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.16)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            position: 'relative',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div
+          <img
+            src={dockMegaphone}
+            alt="Megaphone"
+            width={size}
+            height={size}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%)',
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              objectFit: 'cover',
             }}
+            draggable={false}
           />
-          {/* Megaphone matching reference slot 4 */}
-          <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 11V9C3 7.89543 3.89543 7 5 7H7L16 3V17L7 13H5C3.89543 13 3 12.1046 3 11Z"
-              fill="#ffffff"
-            />
-            <path d="M7 13V18C7 19.1046 7.89543 20 9 20H10C10.5523 20 11 19.5523 11 19V13" fill="#cbd5e1" />
-            <path
-              d="M19 8C19.8 9.2 20.2 10.6 20.2 12C20.2 13.4 19.8 14.8 19 16"
-              stroke="#ffffff"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-          </svg>
         </div>
       );
 
     // ----------------------------------------------------
-    // DOCK SLOT 5: Contact
+    // DOCK SLOT 5: Contact (Glossy 3D Messages with red '1' badge from reference)
     // ----------------------------------------------------
     case 'dock-contact':
       return (
         <div
           style={{
-            width: size,
-            height: size,
-            borderRadius: squircleRadius,
-            background: 'linear-gradient(180deg, #38bdf8 0%, #0ea5e9 100%)',
+            width: `${size}px`,
+            height: `${size}px`,
+            borderRadius: `${Math.round(size * 0.27)}px`,
+            border: '1px solid rgba(230, 230, 235, 0.6)',
+            boxShadow: '0px 1px 4px 0px rgba(0, 0, 0, 0.16)',
+            overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 6px 16px rgba(14, 165, 233, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            position: 'relative',
-            overflow: 'hidden',
+            boxSizing: 'border-box',
           }}
         >
-          <div
+          <img
+            src={dockMessages}
+            alt="Contact"
+            width={size}
+            height={size}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '45%',
-              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%)',
+              width: '100%',
+              height: '100%',
+              display: 'block',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              objectFit: 'cover',
             }}
+            draggable={false}
           />
-          {/* Chat bubble matching reference slot 5 */}
-          <svg width={size * 0.58} height={size * 0.58} viewBox="0 0 24 24" fill="#ffffff">
-            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" />
-          </svg>
         </div>
       );
 

@@ -1,23 +1,18 @@
 export type AppId =
-  | 'about-me'
-  | 'projects'
-  | 'hackathons'
-  | 'experience'
-  | 'skills'
-  | 'open-source'
-  | 'resume'
-  | 'contact';
-
-export type DockAppId =
-  | 'finder'
-  | 'about'
-  | 'projects'
+  | 'framer'
   | 'github'
   | 'linkedin'
-  | 'figma'
-  | 'leetcode'
-  | 'mail'
-  | 'resume';
+  | 'projects'
+  | 'hackathons'
+  | 'skills'
+  | 'about-me';
+
+export type DockSlotId =
+  | 'about'
+  | 'reserved-2'
+  | 'gallery'
+  | 'reserved-4'
+  | 'contact';
 
 export interface Position {
   x: number;
@@ -29,30 +24,33 @@ export interface Size {
   height: number;
 }
 
+export type ActionType = 'external_link' | 'none';
+
 export interface DesktopApp {
   id: AppId;
   name: string;
-  category: string;
-  description: string;
+  iconType: 'framer' | 'github' | 'linkedin' | 'folder' | 'about';
+  actionType: ActionType;
+  actionUrl?: string;
+  isInteractive: boolean;
   defaultPosition: Position;
-  gradient: string;
-  iconType: string;
+  percentX: number;
+  percentY: number;
 }
 
 export interface DockItemData {
-  id: DockAppId;
+  id: DockSlotId;
   name: string;
-  type: 'app' | 'link';
-  url?: string;
-  gradient?: string;
-  isOpen?: boolean;
+  isReserved?: boolean;
+  isInteractive: boolean;
+  actionType: ActionType;
+  actionUrl?: string;
+  badge?: string | number;
 }
 
-// Window state structure prepared for Prompt #2
 export interface WindowState {
   id: string;
-  appId?: AppId | string;
-  folderId?: string;
+  appId?: string;
   title: string;
   isOpen: boolean;
   isMinimized: boolean;

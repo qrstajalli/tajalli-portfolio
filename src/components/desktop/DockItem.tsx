@@ -18,20 +18,23 @@ export const DockItem: React.FC<DockItemProps> = ({
   const itemRef = useRef<HTMLDivElement>(null);
   const [isPressed, setIsPressed] = useState(false);
 
-  // Compute upward lift from scale
-  const translateY = -(scale - 1) * 26;
+  // Subtle upward lift from scale
+  const translateY = -(scale - 1) * 18;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (item.type === 'link' && item.url) {
-      window.open(item.url, '_blank', 'noopener,noreferrer');
-    } else {
-      console.log(`[Mac Dock] Clicked app: ${item.name} (${item.id})`);
-      onItemClick(item);
+    // Inactive until future instructions define functionality
+    if (item.isInteractive && item.actionType === 'external_link' && item.actionUrl) {
+      window.open(item.actionUrl, '_blank', 'noopener,noreferrer');
+      return;
     }
+
+    onItemClick(item);
   };
+
+  const graphicId = `dock-${item.id}`;
 
   return (
     <div
@@ -49,14 +52,14 @@ export const DockItem: React.FC<DockItemProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        width: '50px',
-        height: '54px',
-        cursor: 'pointer',
+        width: '52px',
+        height: '56px',
+        cursor: item.isInteractive ? 'pointer' : 'default',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         transform: `translateY(${translateY}px) scale(${isPressed ? scale * 0.94 : scale})`,
         transformOrigin: 'bottom center',
-        transition: 'transform 0.12s cubic-bezier(0.2, 0, 0, 1)',
+        transition: 'transform 0.14s cubic-bezier(0.2, 0, 0, 1)',
         zIndex: isHovered ? 100 : Math.round(scale * 10),
       }}
     >
@@ -66,20 +69,20 @@ export const DockItem: React.FC<DockItemProps> = ({
           style={{
             position: 'absolute',
             bottom: '100%',
-            marginBottom: '10px',
-            backgroundColor: 'rgba(20, 24, 36, 0.85)',
+            marginBottom: '12px',
+            backgroundColor: 'rgba(15, 18, 28, 0.88)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             border: '1px solid rgba(255, 255, 255, 0.18)',
-            boxShadow: '0 6px 18px rgba(0, 0, 0, 0.45)',
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.5)',
             color: '#f8fafc',
-            fontSize: '0.74rem',
+            fontSize: '0.76rem',
             fontWeight: 500,
             padding: '3px 10px',
             borderRadius: '8px',
             whiteSpace: 'nowrap',
             pointerEvents: 'none',
-            letterSpacing: '0.01em',
+            letterSpacing: '-0.01em',
             animation: 'fadeIn 0.15s ease-out',
           }}
         >
@@ -87,30 +90,18 @@ export const DockItem: React.FC<DockItemProps> = ({
         </div>
       )}
 
-      {/* App Icon */}
+      {/* Dock Icon Asset */}
       <div
         style={{
+          position: 'relative',
           filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <AppIconGraphics id={item.id} size={46} />
+        <AppIconGraphics id={graphicId} size={48} />
       </div>
-
-      {/* Running/Open Indicator Dot */}
-      <div
-        style={{
-          width: '4px',
-          height: '4px',
-          borderRadius: '50%',
-          backgroundColor: item.isOpen ? 'rgba(255, 255, 255, 0.85)' : 'transparent',
-          marginTop: '4px',
-          boxShadow: item.isOpen ? '0 0 6px rgba(255, 255, 255, 0.8)' : 'none',
-          transition: 'background-color 0.2s',
-        }}
-      />
     </div>
   );
 };

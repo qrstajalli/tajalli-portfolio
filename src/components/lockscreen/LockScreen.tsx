@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Lock, Unlock, ArrowRight, Delete } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { SYSTEM_USER } from '../../data/systemConfig';
-import { useTime } from '../../hooks/useTime';
 
 interface LockScreenProps {
   onUnlock: () => void;
@@ -9,81 +7,54 @@ interface LockScreenProps {
 
 export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
   const [pin, setPin] = useState<string>('');
+  const [showPin, setShowPin] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const { timeStr, fullDateStr } = useTime();
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleDigit = useCallback(
-    (digit: string) => {
-      if (isSuccess) return;
-      if (pin.length < 6) {
-        setIsError(false);
-        setErrorMessage('');
-        setPin((prev) => prev + digit);
-      }
-    },
-    [pin.length, isSuccess]
-  );
-
-  const handleBackspace = useCallback(() => {
-    if (isSuccess) return;
-    setIsError(false);
-    setErrorMessage('');
-    setPin((prev) => prev.slice(0, -1));
-  }, [isSuccess]);
+  // Auto-focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const handleSubmit = useCallback(() => {
-    if (isSuccess) return;
+    if (isLoggingIn || isUnlocked) return;
 
     if (pin === SYSTEM_USER.pin) {
-      setIsSuccess(true);
       setIsError(false);
-      setErrorMessage('');
+      setIsLoggingIn(true);
+      // Windows-like "Welcome" state then unlock
       setTimeout(() => {
-        onUnlock();
-      }, 550);
+        setIsUnlocked(true);
+        setTimeout(() => {
+          onUnlock();
+        }, 350);
+      }, 700);
     } else {
       setIsError(true);
-      setErrorMessage('The PIN is incorrect. Try again.');
+      // Keep error message, clear input and re-focus
       setTimeout(() => {
         setPin('');
-      }, 700);
+        inputRef.current?.focus();
+      }, 500);
     }
-  }, [pin, onUnlock, isSuccess]);
+  }, [pin, isLoggingIn, isUnlocked, onUnlock]);
 
-  // Keyboard navigation & number input
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isSuccess) return;
-
-      if (/^[0-9]$/.test(e.key)) {
-        e.preventDefault();
-        handleDigit(e.key);
-      } else if (e.key === 'Backspace') {
-        e.preventDefault();
-        handleBackspace();
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        handleSubmit();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleDigit, handleBackspace, handleSubmit, isSuccess]);
-
-  // Automatic submit if 4 digits entered
-  useEffect(() => {
-    if (pin.length === 4 && !isSuccess) {
-      if (pin === SYSTEM_USER.pin) {
-        handleSubmit();
-      }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
     }
-  }, [pin, handleSubmit, isSuccess]);
+  };
+
+  const handleContainerClick = () => {
+    inputRef.current?.focus();
+  };
 
   return (
     <div
+      onClick={handleContainerClick}
       style={{
         position: 'fixed',
         inset: 0,
@@ -91,384 +62,352 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '40px 20px',
-        backgroundImage: `radial-gradient(circle at 50% 25%, rgba(12, 14, 23, 0.4) 0%, rgba(12, 14, 23, 0.85) 100%), url(/assets/images/wallpaper.jpg)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        transition: 'opacity 0.5s ease-out, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
-        opacity: isSuccess ? 0 : 1,
-        transform: isSuccess ? 'scale(1.06)' : 'scale(1)',
-        pointerEvents: isSuccess ? 'none' : 'auto',
+        justifyContent: 'center',
+        backgroundColor: '#004e8c',
+        backgroundImage: 'radial-gradient(circle at 50% 45%, #005a9e 0%, #003a66 100%)',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        fontFamily: "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif",
+        opacity: isUnlocked ? 0 : 1,
+        transition: 'opacity 0.35s ease-out',
+        pointerEvents: isUnlocked ? 'none' : 'auto',
       }}
     >
-      {/* Top Lock Screen Clock & Date */}
+      {/* Centered Windows User Profile Container */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          marginTop: '20px',
-          textShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+          marginTop: '-40px', // Perfectly centers visually on screen
         }}
       >
-        <h1
-          style={{
-            fontSize: 'clamp(3rem, 7vw, 5.5rem)',
-            fontWeight: 300,
-            letterSpacing: '-0.02em',
-            color: '#ffffff',
-            lineHeight: 1,
-            marginBottom: '8px',
-          }}
-        >
-          {timeStr}
-        </h1>
-        <p
-          style={{
-            fontSize: 'clamp(0.95rem, 1.8vw, 1.25rem)',
-            fontWeight: 400,
-            color: 'rgba(255, 255, 255, 0.85)',
-            letterSpacing: '0.01em',
-          }}
-        >
-          {fullDateStr}
-        </p>
-      </div>
-
-      {/* Center Profile & PIN Entry Box */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          maxWidth: '380px',
-          width: '100%',
-        }}
-      >
-        {/* User Avatar */}
+        {/* Windows Circular Avatar */}
         <div
           style={{
-            position: 'relative',
-            width: '110px',
-            height: '110px',
+            width: '180px',
+            height: '180px',
             borderRadius: '50%',
-            padding: '3px',
-            background: 'linear-gradient(135deg, rgba(129, 140, 248, 0.8), rgba(192, 132, 252, 0.5), rgba(56, 189, 248, 0.8))',
-            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45)',
-            marginBottom: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.22)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            marginBottom: '22px',
           }}
         >
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle at 35% 35%, #2a3148 0%, #151926 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '2.2rem',
-              fontWeight: 600,
-              color: '#ffffff',
-              letterSpacing: '1px',
-              border: '2px solid rgba(255, 255, 255, 0.15)',
-            }}
+          {/* Authentic Windows User Line Icon */}
+          <svg
+            width="110"
+            height="110"
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            TS
-          </div>
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '2px',
-              right: '2px',
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              backgroundColor: isSuccess ? '#10b981' : 'rgba(30, 41, 59, 0.95)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '2px solid #0c0e17',
-              color: '#ffffff',
-              transition: 'background-color 0.3s ease',
-            }}
-          >
-            {isSuccess ? <Unlock size={14} /> : <Lock size={13} />}
-          </div>
+            {/* Head circle */}
+            <circle cx="50" cy="36" r="18" stroke="#ffffff" strokeWidth="4" />
+            {/* Shoulders arch */}
+            <path
+              d="M 22 84 C 22 65, 36 59, 50 59 C 64 59, 78 65, 78 84"
+              stroke="#ffffff"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
 
-        {/* User Name */}
-        <h2
+        {/* Display Name */}
+        <h1
           style={{
-            fontSize: '1.6rem',
-            fontWeight: 600,
+            fontSize: '1.95rem',
+            fontWeight: 350,
             color: '#ffffff',
-            marginBottom: '4px',
-            letterSpacing: '-0.01em',
-            textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+            letterSpacing: '0.01em',
+            marginBottom: '20px',
+            textAlign: 'center',
+            textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
           }}
         >
           {SYSTEM_USER.name}
-        </h2>
-        <span
-          style={{
-            fontSize: '0.88rem',
-            color: 'rgba(255, 255, 255, 0.7)',
-            marginBottom: '20px',
-            letterSpacing: '0.02em',
-          }}
-        >
-          {SYSTEM_USER.role}
-        </span>
+        </h1>
 
-        {/* Enter PIN text */}
-        <p
-          style={{
-            fontSize: '0.85rem',
-            fontWeight: 500,
-            color: 'rgba(255, 255, 255, 0.75)',
-            marginBottom: '10px',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-          }}
-        >
-          Enter PIN
-        </p>
-
-        {/* PIN Dots Display + Submit Button */}
-        <div
-          className={isError ? 'animate-shake' : ''}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            marginBottom: '10px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: isError
-              ? '1px solid rgba(244, 63, 94, 0.8)'
-              : '1px solid rgba(255, 255, 255, 0.16)',
-            borderRadius: '24px',
-            padding: '10px 18px',
-            boxShadow: isError
-              ? '0 0 16px rgba(244, 63, 94, 0.3)'
-              : '0 8px 24px rgba(0, 0, 0, 0.3)',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
-          }}
-        >
-          <div style={{ display: 'flex', gap: '10px', minWidth: '90px', justifyContent: 'center' }}>
-            {[0, 1, 2, 3].map((idx) => {
-              const isFilled = idx < pin.length;
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: isFilled
-                      ? isError
-                        ? '#f43f5e'
-                        : '#818cf8'
-                      : 'rgba(255, 255, 255, 0.2)',
-                    boxShadow: isFilled && !isError ? '0 0 8px #818cf8' : 'none',
-                    transition: 'all 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: isFilled ? 'scale(1.15)' : 'scale(1)',
-                  }}
-                />
-              );
-            })}
-          </div>
-
-          {/* Submit arrow button */}
-          <button
-            onClick={handleSubmit}
-            disabled={pin.length === 0 || isSuccess}
-            aria-label="Submit PIN"
+        {/* Windows PIN Input / Welcome State */}
+        {isLoggingIn ? (
+          <div
             style={{
-              background: pin.length > 0 ? 'rgba(129, 140, 248, 0.9)' : 'rgba(255, 255, 255, 0.12)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '28px',
-              height: '28px',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              cursor: pin.length > 0 ? 'pointer' : 'default',
-              transition: 'background 0.2s, transform 0.15s',
-              opacity: pin.length > 0 ? 1 : 0.4,
+              gap: '14px',
+              minHeight: '60px',
             }}
           >
-            <ArrowRight size={15} />
-          </button>
-        </div>
-
-        {/* Subtle Error Message */}
-        <div style={{ minHeight: '22px', marginBottom: '14px' }}>
-          {errorMessage && (
-            <p
+            {/* Windows Circular Spinner */}
+            <div
               style={{
-                fontSize: '0.82rem',
-                color: '#fb7185',
-                fontWeight: 500,
-                textAlign: 'center',
-                animation: 'fadeIn 0.2s ease-out',
+                width: '28px',
+                height: '28px',
+                border: '3px solid rgba(255, 255, 255, 0.3)',
+                borderTopColor: '#ffffff',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite',
+              }}
+            />
+            <span
+              style={{
+                fontSize: '1.05rem',
+                color: '#ffffff',
+                fontWeight: 300,
+                letterSpacing: '0.02em',
               }}
             >
-              {errorMessage}
-            </p>
-          )}
-        </div>
-
-        {/* Numeric On-screen Keypad */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '10px',
-            width: '240px',
-          }}
-        >
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
-            <button
-              key={digit}
-              onClick={() => handleDigit(digit)}
+              Welcome
+            </span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Input Row: Input box with eye icon and submit arrow */}
+            <div
+              className={isError ? 'animate-shake' : ''}
               style={{
-                height: '46px',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                background: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                color: '#ffffff',
-                fontSize: '1.25rem',
-                fontWeight: 500,
-                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.15s, transform 0.1s, border-color 0.15s',
-              }}
-              onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-              onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.25)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-                e.currentTarget.style.transform = 'scale(1)';
+                backgroundColor: '#ffffff',
+                border: '2px solid rgba(0, 0, 0, 0.6)',
+                width: '272px',
+                height: '34px',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)',
               }}
             >
-              {digit}
-            </button>
-          ))}
+              <input
+                ref={inputRef}
+                type={showPin ? 'text' : 'password'}
+                value={pin}
+                onChange={(e) => {
+                  setIsError(false);
+                  setPin(e.target.value);
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder="PIN"
+                aria-label="PIN"
+                autoComplete="off"
+                style={{
+                  flex: 1,
+                  height: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  padding: '0 10px',
+                  fontSize: '15px',
+                  fontFamily: 'inherit',
+                  letterSpacing: showPin ? 'normal' : '2px',
+                  color: '#000000',
+                  backgroundColor: 'transparent',
+                }}
+              />
 
-          {/* Backspace Button */}
-          <button
-            onClick={handleBackspace}
-            aria-label="Delete digit"
-            style={{
-              height: '46px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              background: 'rgba(255, 255, 255, 0.06)',
-              color: 'rgba(255, 255, 255, 0.8)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.15s, transform 0.1s',
-            }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.14)')}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <Delete size={20} />
-          </button>
+              {/* Reveal Password Eye Button */}
+              {pin.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
+                  title={showPin ? 'Hide PIN' : 'Show PIN'}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '0 6px',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#333333',
+                  }}
+                >
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              )}
 
-          {/* 0 Button */}
-          <button
-            onClick={() => handleDigit('0')}
-            style={{
-              height: '46px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              background: 'rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              color: '#ffffff',
-              fontSize: '1.25rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'background 0.15s, transform 0.1s',
-            }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.16)')}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            0
-          </button>
+              {/* Submit Arrow Button */}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                aria-label="Submit PIN"
+                title="Submit"
+                style={{
+                  width: '32px',
+                  height: '100%',
+                  border: 'none',
+                  borderLeft: '1px solid #d1d5db',
+                  backgroundColor: '#f3f4f6',
+                  color: '#1f2937',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            </div>
 
-          {/* Submit / Enter Key */}
-          <button
-            onClick={handleSubmit}
-            aria-label="Unlock"
-            style={{
-              height: '46px',
-              borderRadius: '12px',
-              border: '1px solid rgba(129, 140, 248, 0.4)',
-              background: 'rgba(129, 140, 248, 0.25)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'background 0.15s, transform 0.1s',
-            }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(129, 140, 248, 0.45)')}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(129, 140, 248, 0.25)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            <ArrowRight size={20} />
-          </button>
-        </div>
+            {/* Error Message */}
+            <div style={{ minHeight: '26px', marginTop: '6px', textAlign: 'center' }}>
+              {isError && (
+                <span
+                  style={{
+                    fontSize: '0.84rem',
+                    color: '#ffffff',
+                    fontWeight: 400,
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  The PIN is incorrect. Try again.
+                </span>
+              )}
+            </div>
+
+            {/* "Sign-in options" */}
+            <div
+              style={{
+                marginTop: '10px',
+                fontSize: '0.85rem',
+                color: 'rgba(255, 255, 255, 0.78)',
+                cursor: 'pointer',
+                letterSpacing: '0.01em',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.78)')}
+            >
+              Sign-in options
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Bottom Subtle Status */}
+      {/* Bottom-Right System Icons (Network, Accessibility, Power) */}
       <div
         style={{
+          position: 'absolute',
+          bottom: '24px',
+          right: '28px',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          color: 'rgba(255, 255, 255, 0.55)',
-          fontSize: '0.8rem',
+          gap: '18px',
+          color: 'rgba(255, 255, 255, 0.88)',
         }}
       >
-        <Lock size={13} />
-        <span>Tajalli Portfolio • Secure Desktop Workspace</span>
+        {/* Network / Ethernet Computer Icon */}
+        <div
+          title="Internet access"
+          style={{
+            cursor: 'default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+          }}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {/* Monitor screen */}
+            <rect x="2" y="3" width="16" height="12" rx="1" />
+            <path d="M6 15v3h8v-3" />
+            {/* Small network node / adapter */}
+            <rect x="15" y="15" width="7" height="6" rx="1" />
+            <line x1="17" y1="18" x2="20" y2="18" />
+          </svg>
+        </div>
+
+        {/* Accessibility / Ease of Access Icon */}
+        <div
+          title="Ease of Access"
+          style={{
+            cursor: 'default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+          }}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {/* Dotted ease of access clock / meter */}
+            <circle cx="12" cy="12" r="9" strokeDasharray="4 2.5" />
+            <polyline points="12 7 12 12 15.5 15.5" />
+          </svg>
+        </div>
+
+        {/* Power Button Icon */}
+        <div
+          title="Power"
+          style={{
+            cursor: 'default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '28px',
+            height: '28px',
+          }}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+            <line x1="12" y1="2" x2="12" y2="11" />
+          </svg>
+        </div>
       </div>
     </div>
   );

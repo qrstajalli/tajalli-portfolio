@@ -7,7 +7,11 @@ import { DesktopIcon } from './DesktopIcon';
 
 const STORAGE_KEY_MAC_POSITIONS = 'tajalli_mac_desktop_positions_v1';
 
-export const Desktop: React.FC = () => {
+interface DesktopProps {
+  isRevealed?: boolean;
+}
+
+export const Desktop: React.FC<DesktopProps> = ({ isRevealed = true }) => {
   const [selectedAppId, setSelectedAppId] = useState<AppId | null>(null);
 
   // Position management with localStorage persistence and fallback defaults
@@ -68,54 +72,54 @@ export const Desktop: React.FC = () => {
         userSelect: 'none',
       }}
     >
-      {/* Top Mac Menu Bar */}
-      <MenuBar />
-
-      {/* Subtle Iconic Macintosh "hello" script in center background (as in MyOS reference) */}
+      {/* Top Mac Menu Bar (Fade/slide reveal) */}
       <div
         style={{
-          position: 'absolute',
-          top: '46%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          textAlign: 'center',
-          opacity: 0.72,
+          opacity: isRevealed ? 1 : 0,
+          transform: isRevealed ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isRevealed ? 'auto' : 'none',
         }}
       >
-        <span
-          style={{
-            fontFamily: "'Brush Script MT', 'Segoe Script', cursive, sans-serif",
-            fontSize: 'clamp(3.8rem, 9vw, 7.5rem)',
-            fontWeight: 300,
-            color: 'rgba(255, 255, 255, 0.88)',
-            letterSpacing: '0.02em',
-            textShadow: '0 8px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(99, 102, 241, 0.25)',
-          }}
-        >
-          hello
-        </span>
+        <MenuBar />
       </div>
 
-      {/* Desktop App Icons */}
-      {DESKTOP_APPS.map((app) => {
-        const pos = positions[app.id] || app.defaultPosition;
-        return (
-          <DesktopIcon
-            key={app.id}
-            app={app}
-            position={pos}
-            isSelected={selectedAppId === app.id}
-            onSelect={() => handleAppSelect(app.id)}
-            onDoubleClick={() => handleAppDoubleClick(app)}
-            onPositionChange={(newPos) => handlePositionChange(app.id, newPos)}
-          />
-        );
-      })}
+      {/* Desktop App Icons (Fade/scale reveal) */}
+      <div
+        style={{
+          opacity: isRevealed ? 1 : 0,
+          transform: isRevealed ? 'scale(1)' : 'scale(0.96)',
+          transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isRevealed ? 'auto' : 'none',
+        }}
+      >
+        {DESKTOP_APPS.map((app) => {
+          const pos = positions[app.id] || app.defaultPosition;
+          return (
+            <DesktopIcon
+              key={app.id}
+              app={app}
+              position={pos}
+              isSelected={selectedAppId === app.id}
+              onSelect={() => handleAppSelect(app.id)}
+              onDoubleClick={() => handleAppDoubleClick(app)}
+              onPositionChange={(newPos) => handlePositionChange(app.id, newPos)}
+            />
+          );
+        })}
+      </div>
 
-      {/* Bottom Floating Mac Dock */}
-      <Dock items={DOCK_ITEMS} onItemClick={handleDockItemClick} />
+      {/* Bottom Floating Mac Dock (Fade/slide reveal) */}
+      <div
+        style={{
+          opacity: isRevealed ? 1 : 0,
+          transform: isRevealed ? 'translateY(0)' : 'translateY(16px)',
+          transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+          pointerEvents: isRevealed ? 'auto' : 'none',
+        }}
+      >
+        <Dock items={DOCK_ITEMS} onItemClick={handleDockItemClick} />
+      </div>
     </div>
   );
 };

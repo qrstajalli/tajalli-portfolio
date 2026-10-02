@@ -5,7 +5,8 @@ interface UseDraggableOptions {
   initialPosition: Position;
   elementWidth: number;
   elementHeight: number;
-  bottomOffset?: number; // e.g. taskbar height
+  topOffset?: number;
+  bottomOffset?: number;
   onDragEnd?: (pos: Position) => void;
   disabled?: boolean;
 }
@@ -14,7 +15,8 @@ export function useDraggable({
   initialPosition,
   elementWidth,
   elementHeight,
-  bottomOffset = 48,
+  topOffset = 32,
+  bottomOffset = 80,
   onDragEnd,
   disabled = false,
 }: UseDraggableOptions) {
@@ -57,10 +59,10 @@ export function useDraggable({
 
           // Clamp to viewport bounds
           const maxX = Math.max(10, window.innerWidth - elementWidth - 10);
-          const maxY = Math.max(10, window.innerHeight - bottomOffset - elementHeight - 10);
+          const maxY = Math.max(topOffset, window.innerHeight - bottomOffset - elementHeight - 10);
 
           const clampedX = Math.min(Math.max(10, rawX), maxX);
-          const clampedY = Math.min(Math.max(10, rawY), maxY);
+          const clampedY = Math.min(Math.max(topOffset, rawY), maxY);
 
           setPosition({ x: clampedX, y: clampedY });
         }
